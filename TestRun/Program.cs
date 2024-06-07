@@ -1,4 +1,4 @@
-﻿using DistributionManager.Domain.Helper.JsonDiff;
+﻿using JsonCompareDiff;
 
 namespace TestRun
 {

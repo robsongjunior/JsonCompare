@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DistributionManager.Domain.Helper.JsonDiff
+namespace JsonCompareDiff
 {
     public static class JsonCompare
     {
