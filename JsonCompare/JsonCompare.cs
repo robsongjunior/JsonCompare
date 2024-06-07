@@ -18,7 +18,7 @@ namespace DistributionManager.Domain.Helper.JsonDiff
             var beforeJObject = default(JObject);
             var afterJObject = default(JObject);
 
-            if (string.IsNullOrEmpty(beforeJson)|| beforeJson == "null")
+            if (string.IsNullOrEmpty(beforeJson) || beforeJson == "null")
             {
                 afterJObject = string.IsNullOrEmpty(afterJson) ? new JObject() : JObject.Parse(afterJson);
 
@@ -52,21 +52,46 @@ namespace DistributionManager.Domain.Helper.JsonDiff
                     {
                         if (beforeProp.Type == JTokenType.Array && afterProp.Type == JTokenType.Array)
                         {
-                            var beforeItems = beforeProp.ToObject<List<JObject>>();
-                            var afterItems = afterProp.ToObject<List<JObject>>();
-                            var removedItems = beforeItems.Except(afterItems, new JObjectComparer()).ToList();
-                            var addedItems = afterItems.Except(beforeItems, new JObjectComparer()).ToList();
+                            var beforeArray = beforeProp as JArray;
+                            var afterArray = afterProp as JArray;
 
-                            if (removedItems.Count > 0)
+                            if (beforeArray.HasValues && beforeArray.First.Type == JTokenType.Object && afterArray.HasValues && afterArray.First.Type == JTokenType.Object)
                             {
-                                differences.Differences[property] = new Changes { Removed = removedItems.Cast<object>().ToList() };
+                                var beforeItems = beforeArray.ToObject<List<JObject>>();
+                                var afterItems = afterArray.ToObject<List<JObject>>();
+                                var removedItems = beforeItems.Except(afterItems, new JObjectComparer()).ToList();
+                                var addedItems = afterItems.Except(beforeItems, new JObjectComparer()).ToList();
+
+                                if (removedItems.Count > 0)
+                                {
+                                    differences.Differences[property] = new Changes { Removed = removedItems.Cast<object>().ToList() };
+                                }
+                                if (addedItems.Count > 0)
+                                {
+                                    if (differences.Differences.ContainsKey(property))
+                                        differences.Differences[property].Inserted = addedItems.Cast<object>().ToList();
+                                    else
+                                        differences.Differences[property] = new Changes { Inserted = addedItems.Cast<object>().ToList() };
+                                }
                             }
-                            if (addedItems.Count > 0)
+                            else
                             {
-                                if (differences.Differences.ContainsKey(property))
-                                    differences.Differences[property].Inserted = addedItems.Cast<object>().ToList();
-                                else
-                                    differences.Differences[property] = new Changes { Inserted = addedItems.Cast<object>().ToList() };
+                                var beforeItems = beforeArray.ToObject<List<object>>();
+                                var afterItems = afterArray.ToObject<List<object>>();
+                                var removedItems = beforeItems.Except(afterItems).ToList();
+                                var addedItems = afterItems.Except(beforeItems).ToList();
+
+                                if (removedItems.Count > 0)
+                                {
+                                    differences.Differences[property] = new Changes { Removed = removedItems };
+                                }
+                                if (addedItems.Count > 0)
+                                {
+                                    if (differences.Differences.ContainsKey(property))
+                                        differences.Differences[property].Inserted = addedItems;
+                                    else
+                                        differences.Differences[property] = new Changes { Inserted = addedItems };
+                                }
                             }
                         }
                         else
@@ -83,9 +108,9 @@ namespace DistributionManager.Domain.Helper.JsonDiff
         public static bool HasDifference(string simpleBefore, string simpleAfter, List<string>? ignoredKeys = null)
         {
             var diff = default(DifferenceDetails);
-            
 
-            if (!(string.IsNullOrEmpty(simpleBefore)|| string.IsNullOrEmpty(simpleAfter)))
+
+            if (!(string.IsNullOrEmpty(simpleBefore) || string.IsNullOrEmpty(simpleAfter)))
             {
                 diff = JsonCompare.Compare(simpleBefore, simpleAfter, ignoredKeys);
             }
