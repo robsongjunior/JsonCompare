@@ -75,3 +75,4 @@ Open the project in your preferred IDE.
 Install the necessary dependencies.
 Use the Compare class to compare your JSONs!
 
+⚠️ I am providing this code as fully open, free, and without any liabilities for its use. The primary goal is to strengthen the open-source community and promote learning. This code is not intended for commercial purposes and should not be used as such. Feel free to study, modify, and distribute the code as you wish, always respecting the principles of the open-source community. The repository is open for contributions, and everyone is welcome to collaborate to further improve this project.
